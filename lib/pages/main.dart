@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:personal_project/custom_styles.dart';
 import 'package:personal_project/custom_widgets.dart';
 
 void main() {
@@ -46,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void addGoal(String text) {
     setState(() {
       goalsList.add(text);
+      print("we added one. ${goalsList.length}");
     });
   }
 
@@ -53,48 +55,35 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     ColorScheme colorScheme = Theme.of(context).colorScheme;
+    Size deviceSize = MediaQuery.of(context).size;
 
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
         backgroundColor: colorScheme.secondary,
         automaticallyImplyLeading: false,
-        leading: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
-          child: IconButton(
-            icon: Icon(
-              Icons.edit,
-              color: colorScheme.primary,
-            ),
+        leading: IconButton(
+          icon: Icon(
+            Icons.edit,
+            color: colorScheme.primary,
+          ),
+          onPressed: () {
+            print('IconButton pressed ...');
+          },
+        ),
+        title: Text(
+          'F o ( u s',
+          style: textStyleColor,
+        ),
+        actions: [
+          IconButton(
             onPressed: () {
               print('IconButton pressed ...');
             },
-          ),
-        ),
-        title: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
-          child: Text(
-            'F o ( u s',
-            style: TextStyle( //todo - move styling to other file
-              fontFamily: 'Readex Pro',
-              color: colorScheme.primary,
-              fontSize: 32,
-            ),
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
-            child: IconButton(
-              onPressed: () {
-                print('IconButton pressed ...');
-              },
-              icon: Icon(
-                  Icons.settings_sharp,
-                  color: colorScheme.primary,),
-            ),
+            icon: Icon(
+                Icons.settings_sharp,
+                color: colorScheme.primary,),
           ),
         ],
         centerTitle: true,
@@ -102,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Padding(
             padding: EdgeInsetsDirectional.fromSTEB(0, 40, 0, 60),
@@ -111,21 +100,26 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                GoalTile(context: context, text: "goal 1", priority: 0),
-                GoalTile(context: context, text: "goal 2", priority: 1),
-                GoalTile(context: context, text: "goal 3", priority: 2),
+                GoalTile(context: context,
+                    text: goalsList.length > 0 ? goalsList[0] : "ENTER",
+                    priority: 0),
+                GoalTile(context: context,
+                    text: goalsList.length > 1 ? goalsList[1] : "ENTER",
+                    priority: 1),
+                GoalTile(context: context,
+                    text: goalsList.length > 2 ? goalsList[2] : "ENTER",
+                    priority: 2),
                 showFourthGoal ? GoalTile(context: context, text: "goal 4", priority: 4): SizedBox(),
               ],
             ),
           ),
-          Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0, 0, 20, 0),
-            child: IconButton( //todo, move lower
-              // borderColor: Color(0xFFC98F2A),
-              // borderRadius: 30,
-              // borderWidth: 6,
-              // buttonSize: 80,
-              // fillColor: Color(0x00FFFFFF),
+          Container(
+            width: deviceSize.width / 2,
+            decoration: BoxDecoration(
+              border: Border.all(color: colorScheme.primary, width: 4),
+              borderRadius: BorderRadius.all(Radius.circular(30)),
+            ),
+            child: IconButton(
               icon: Icon(
                 Icons.add,
                 color: colorScheme.primary,
@@ -138,8 +132,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     return GestureDetector(
                       onTap: () => FocusScope.of(context).unfocus(),
                       child: AddGoalBottomBar(
-                          onPressed: addGoal,
-                          context: context,
+                        onPressed: addGoal,
+                        context: context,
                       ),
                     );
                   },

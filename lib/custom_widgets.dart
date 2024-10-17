@@ -5,6 +5,9 @@ Widget AddGoalBottomBar({required Function onPressed, required BuildContext cont
   ColorScheme colorScheme = Theme.of(context).colorScheme;
   Size deviceSize = MediaQuery.of(context).size;
 
+  TextEditingController newGoalController = TextEditingController();
+  FocusNode newGoalFocusNode = FocusNode();
+
   return Container(
     height: deviceSize.height * .45,
     decoration: BoxDecoration(
@@ -20,15 +23,7 @@ Widget AddGoalBottomBar({required Function onPressed, required BuildContext cont
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Add goal:',
-                style: TextStyle(
-                  fontFamily: 'Readex Pro',
-                  fontSize: 24,
-                  letterSpacing: 0.0,
-                  color: colorScheme.primary,
-                ),
-              ),
+              Text('Add goal:', style: textStyleColor),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -49,8 +44,8 @@ Widget AddGoalBottomBar({required Function onPressed, required BuildContext cont
         Container(
           width: deviceSize.width * 0.85,
           child: TextFormField(
-            // controller: _model.textController,
-            // focusNode: _model.textFieldFocusNode, //todo
+            controller: newGoalController,
+            focusNode: newGoalFocusNode,
             autofocus: false,
             obscureText: false,
             decoration: InputDecoration(
@@ -79,29 +74,23 @@ Widget AddGoalBottomBar({required Function onPressed, required BuildContext cont
             // validator: textControllerValidator.asValidator(context), //todo validator
           ),
         ),
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.secondary,
-                ),
-                onPressed: () {
-                  onPressed("newText"); //todo - get text
-                },
-                child: Text("add"), //todo - label
-              ),
-            ),
-          ],
+        SizedBox(height: deviceSize.height /55,),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colorScheme.secondary,
+          ),
+          onPressed: () {
+            onPressed(newGoalController.text);
+            Navigator.of(context).pop();
+          },
+          child: Text("add"), //todo - label
         ),
       ]
     ),
   );
 }
 
+///The 3 (or 4) main boxes
 Widget GoalTile({required BuildContext context, required String text, required int priority}) {
   double opacity = priority > 2 ? 0.25 : 1;
   Color borderColor = Colors.red;
@@ -125,30 +114,40 @@ Widget GoalTile({required BuildContext context, required String text, required i
     opacity: opacity,
     child: Padding(
       padding: padding,
-      child: Container(
-        width: 100,
-        height: 100,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondary,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 4,
-              color: Colors.black26,
-              offset: Offset(0, 2,),
-              spreadRadius: 5,
-            )
-          ],
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: borderColor,
-            width: 7,
-          ),
+      child: InkWell(
+        onTap: () => showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Text("Delete or edit"),
+            backgroundColor: Colors.brown,
         ),
-        child: Align(
-          alignment: AlignmentDirectional(0, 0),
-          child: Text(
-            text,
-            style: goalTileLabelTextStyle,
+        barrierDismissible: true,
+        ),
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondary,
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 4,
+                color: Colors.black26,
+                offset: Offset(0, 2,),
+                spreadRadius: 5,
+              )
+            ],
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: borderColor,
+              width: 7,
+            ),
+          ),
+          child: Align(
+            alignment: AlignmentDirectional(0, 0),
+            child: Text(
+              text,
+              style: textStyleWhite,
+            ),
           ),
         ),
       ),
