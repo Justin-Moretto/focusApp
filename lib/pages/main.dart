@@ -50,26 +50,49 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   AlertDialog editOrDeleteGoalDialog(Goal goal, BuildContext context) {
+    TextEditingController goalController = TextEditingController(text: goal.text);
+
     return AlertDialog(
       title: Text("Delete or edit"),
-      backgroundColor: Colors.brown,
+      backgroundColor:  Theme.of(context).colorScheme.secondary,
       content: SizedBox(
         height: deviceSize.height / 5,
         child: Column(
           children: [
-            Text(goal.text!),
+            TextField(
+              controller: goalController, // Set the controller to the TextField
+              decoration: InputDecoration(
+                hintText: "Edit goal",
+                hintStyle: TextStyle(color: Colors.white54), // Optional: styling
+                filled: true,
+                fillColor: Colors.grey[800],
+                border: OutlineInputBorder(),
+              ),
+              style: TextStyle(color: Colors.white), // Optional: styling
+            ),
             goalsList.length > 1 ? StatefulBuilder(
               builder: (context, SetState) {
-                return Slider(
-                    value: currentSliderValue,
-                    min: 0,
-                    max: goalsList.length - 1,
-                    divisions: goalsList.length - 1,
-                    onChanged: (newValue) {
-                      SetState((){
-                        currentSliderValue = newValue;
-                      });
-                    });
+                return Column(
+                  children: [
+                    Slider(
+                        value: currentSliderValue,
+                        min: 0,
+                        max: goalsList.length - 1,
+                        divisions: goalsList.length - 1,
+                        onChanged: (newValue) {
+                          SetState((){
+                            currentSliderValue = newValue;
+                          });
+                        }),
+                    Row(
+                      children: [
+                        Text("Rank "),
+                        Text("${(goalsList.length - currentSliderValue).toInt()}"),
+                        Text(" of ${goalsList.length}")
+                      ],
+                    )
+                  ],
+                );
               }
             ) : SizedBox(),
           ],
