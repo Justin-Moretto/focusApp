@@ -100,15 +100,41 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       actions: [
         ElevatedButton(onPressed: (){}, child: Text("delete")),
-        ElevatedButton(onPressed: (){}, child: Text("save"))
+        ElevatedButton(
+            onPressed: () {
+              String updatedGoalText = goalController.text;
+              int updatedPriority = convertSliderValueForPriority(currentSliderValue);
+              setState(() {
+                goal.text = updatedGoalText;
+                if (selectedGoalCurrentListIndex != updatedPriority) {
+                  goalsList.removeAt(selectedGoalCurrentListIndex);
+                  goalsList.insert(updatedPriority, goal);
+                  goalsList.asMap().forEach((index, goal) {
+                    goal.priority = index;
+                  });
+                  goalsList.sort((a, b) => a.priority!.compareTo(b.priority!));
+                }
+              });
+              Navigator.of(context).pop();
+            },
+            child: Text("save"))
       ],
     );
   }
 
+  double convertPriorityForSliderValue(Goal goal) {
+    return goalsList.length - goal.priority! - 1;
+  }
+
+  int convertSliderValueForPriority(double sliderValue) {
+    return goalsList.length - 1 - sliderValue.toInt();
+  }
+
+
   void showEditDeletePopup(Goal goal, BuildContext context) {
     if (goal != null) {
-      currentSliderValue = goalsList.length - goal.priority! - 1;
-      print("TEST: $currentSliderValue / ${goalsList.length - 1}");
+      selectedGoalCurrentListIndex = goal.priority!;
+      currentSliderValue = convertPriorityForSliderValue(goal);
       showDialog(
         context: context,
         builder: (context) => StatefulBuilder(
@@ -121,20 +147,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Goal checkIfGoalExists(int value) {
-    if (value == 0) {
-      return Goal();
-    } else if (goalsList.length >= value){
-      return goalsList[value - 1];
-    } else {
-    return Goal();
-    }
-  }
-
-
   bool showFourthGoal = true;
-  int selectedPriorityValue = 0;
   List<Goal> goalsList = [];
+  int selectedGoalCurrentListIndex = 0;
+
   Size deviceSize = Size.zero;
   double currentSliderValue = 0;
 
@@ -174,65 +190,58 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true,
         elevation: 30,
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: deviceSize.height / 22),
-          Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              GoalTile(context: context,
-                  goal: checkIfGoalExists(1),
-                  onTap: () => showEditDeletePopup(checkIfGoalExists(1), context),
-              ),
-              GoalTile(context: context,
-                goal: checkIfGoalExists(2),
-                  onTap: () => showEditDeletePopup(checkIfGoalExists(2), context),
-              ),
-              GoalTile(context: context,
-                  goal: checkIfGoalExists(3),
-                  onTap: () => showEditDeletePopup(checkIfGoalExists(3), context),
-              ),
-              showFourthGoal ?
-              GoalTile(context: context,
-                goal: checkIfGoalExists(4),
-                onTap: () => showEditDeletePopup(checkIfGoalExists(4), context),
-              ): SizedBox(),
-            ],
-          ),
-          SizedBox(height: deviceSize.height / 15),
-          Container(
-            width: deviceSize.width / 2,
-            decoration: BoxDecoration(
-              border: Border.all(color: colorScheme.primary, width: 4),
-              borderRadius: BorderRadius.all(Radius.circular(30)),
-            ),
-            child: IconButton(
-              icon: Icon(
-                Icons.add,
-                color: colorScheme.primary,
-                size: 60,
-              ),
-              onPressed: () async {
-                await showModalBottomSheet(
-                  context: context,
-                  builder: (context) {
-                    return GestureDetector(
-                      onTap: () => FocusScope.of(context).unfocus(),
-                      child: AddGoalBottomBar(
-                        onPressed: addGoal,
-                        context: context,
-                      ),
+      body: Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(height: deviceSize.height / 30, width: deviceSize.width - 1),
+            goalsList.length > 0 ?
+            Expanded(
+              child: ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: goalsList.length > 4 ? 4 : goalsList.length, //display max 4
+                itemBuilder: (context, index) {
+                  if (index < 5) {
+                    return GoalTile(
+                      context: context,
+                      goal: goalsList[index],
+                      onTap: () => showEditDeletePopup(goalsList[index], context),
                     );
-                  },
-                );
-              },
+                  }
+                },
+              ),
+            ): Text("enter something"),
+            Padding(
+              padding: EdgeInsets.only(bottom: deviceSize.height / 8),
+              child: Container(
+                width: deviceSize.width / 2,
+                decoration: BoxDecoration(
+                  border: Border.all(color: colorScheme.primary, width: 4),
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.add,
+                    color: colorScheme.primary,
+                    size: 60,
+                  ),
+                    onPressed: () async {
+                      await showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return AddGoalBottomBar(
+                            onPressed: addGoal,
+                            context: context,
+                          );
+                        },
+                      );
+                    }
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
