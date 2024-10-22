@@ -8,7 +8,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -46,6 +45,12 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       goalsList.add(newGoal);
       print("we added one. ${goalsList.length}");
+    });
+  }
+
+  void toggleEditMode() {
+    setState(() {
+      isEditMode = !isEditMode;
     });
   }
 
@@ -99,7 +104,22 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       actions: [
-        ElevatedButton(onPressed: (){}, child: Text("delete")),
+        ElevatedButton(
+            onPressed: () {
+              setState(() {
+                  goalsList.removeAt(selectedGoalCurrentListIndex);
+                  goalsList.asMap().forEach((index, goal) {
+                    goal.priority = index;
+                  });
+                  goalsList.sort((a, b) => a.priority!.compareTo(b.priority!));
+              });
+              Navigator.of(context).pop();
+            },
+            child: Icon(
+                Icons.delete,
+                color: Theme.of(context).colorScheme.error
+            )
+        ),
         ElevatedButton(
             onPressed: () {
               String updatedGoalText = goalController.text;
@@ -117,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
               });
               Navigator.of(context).pop();
             },
-            child: Text("save"))
+            child: Icon(Icons.save))
       ],
     );
   }
@@ -129,7 +149,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int convertSliderValueForPriority(double sliderValue) {
     return goalsList.length - 1 - sliderValue.toInt();
   }
-
 
   void showEditDeletePopup(Goal goal, BuildContext context) {
     if (goal != null) {
@@ -147,31 +166,121 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Column defaultView() {
+    return  Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SizedBox(height: deviceSize.height / 30, width: deviceSize.width - 1),
+        goalsList.length > 0 ?
+        Expanded(
+          child: ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: goalsList.length > 4 ? 4 : goalsList.length, //display max 4
+            itemBuilder: (context, index) {
+              if (index < 5) {
+                return GoalTile(
+                  isEdit: false,
+                  context: context,
+                  goal: goalsList[index],
+                  onTap: () => showEditDeletePopup(goalsList[index], context),
+                );
+              }
+            },
+          ),
+        ): Text("enter something"), //todo - better text widget here
+        Padding(
+          padding: EdgeInsets.only(bottom: deviceSize.height / 8),
+          child: Container(
+            width: deviceSize.width / 2,
+            decoration: BoxDecoration(
+              border: Border.all(color: colorScheme.primary, width: 4),
+              borderRadius: BorderRadius.all(Radius.circular(30)),
+            ),
+            child: IconButton(
+                icon: Icon(
+                  Icons.add,
+                  color: colorScheme.primary,
+                  size: 60,
+                ),
+                onPressed: () async {
+                  await showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      return AddGoalBottomBar(
+                        onPressed: addGoal,
+                        context: context,
+                      );
+                    },
+                  );
+                }
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Column editView() {
+    return  Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SizedBox(height: deviceSize.height / 30, width: deviceSize.width - 1),
+        Expanded(
+          child: ListView.builder(
+            itemCount: goalsList.length,
+            itemBuilder: (context, index) {
+                return GoalTile(
+                  isEdit: true,
+                  context: context,
+                  goal: goalsList[index],
+                  onTap: () => showEditDeletePopup(goalsList[index], context),
+                );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  bool isEditMode = false;
   bool showFourthGoal = true;
+
   List<Goal> goalsList = [];
   int selectedGoalCurrentListIndex = 0;
+  double currentSliderValue = 0;
 
   Size deviceSize = Size.zero;
-  double currentSliderValue = 0;
+  ColorScheme colorScheme = ColorScheme(
+    brightness: Brightness.dark,
+    primary: const Color(0xFFC98F2A),
+    onPrimary: Colors.white,
+    secondary: const Color(0xFF403C38),
+    onSecondary: Colors.white,
+    error: Colors.red,
+    onError: Colors.white,
+    surface: const Color(0xFF272727),
+    onSurface: Colors.white,
+  );
 
   @override
   Widget build(BuildContext context) {
-    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    colorScheme = Theme.of(context).colorScheme;
     deviceSize = MediaQuery.of(context).size;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
         backgroundColor: colorScheme.secondary,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(
-            Icons.edit,
+            Icons.edit_note,
             color: colorScheme.primary,
+            size: 40,
           ),
-          onPressed: () {
-            print('IconButton pressed ...');
-          },
+          onPressed: () => toggleEditMode(),
         ),
         title: Text(
           'F o ( u s',
@@ -180,68 +289,23 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             onPressed: () {
-              print('IconButton pressed ...');
+              print('IconButton pressed ...'); //todo - add options
             },
             icon: Icon(
                 Icons.settings_sharp,
-                color: colorScheme.primary,),
+                color: colorScheme.primary
+            ),
           ),
         ],
         centerTitle: true,
         elevation: 30,
       ),
-      body: Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(height: deviceSize.height / 30, width: deviceSize.width - 1),
-            goalsList.length > 0 ?
-            Expanded(
-              child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: goalsList.length > 4 ? 4 : goalsList.length, //display max 4
-                itemBuilder: (context, index) {
-                  if (index < 5) {
-                    return GoalTile(
-                      context: context,
-                      goal: goalsList[index],
-                      onTap: () => showEditDeletePopup(goalsList[index], context),
-                    );
-                  }
-                },
-              ),
-            ): Text("enter something"),
-            Padding(
-              padding: EdgeInsets.only(bottom: deviceSize.height / 8),
-              child: Container(
-                width: deviceSize.width / 2,
-                decoration: BoxDecoration(
-                  border: Border.all(color: colorScheme.primary, width: 4),
-                  borderRadius: BorderRadius.all(Radius.circular(30)),
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.add,
-                    color: colorScheme.primary,
-                    size: 60,
-                  ),
-                    onPressed: () async {
-                      await showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          return AddGoalBottomBar(
-                            onPressed: addGoal,
-                            context: context,
-                          );
-                        },
-                      );
-                    }
-                ),
-              ),
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          Expanded(
+            child: isEditMode ? editView() : defaultView(),
+          ),
+        ],
       ),
     );
   }

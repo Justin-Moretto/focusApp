@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 
+final TextStyle textStyleBlack = TextStyle(
+  fontFamily: 'Readex Pro',
+  color: Colors.black,
+  fontSize: 32,
+  letterSpacing: 0.0,
+  fontWeight: FontWeight.w500,
+);
+
 final TextStyle textStyleWhite = TextStyle(
   fontFamily: 'Readex Pro',
   color: Colors.white,
