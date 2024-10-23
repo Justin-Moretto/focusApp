@@ -47,7 +47,7 @@ Widget AddGoalBottomBar({required Function onPressed, required BuildContext cont
           child: TextFormField(
             controller: newGoalController,
             focusNode: newGoalFocusNode,
-            autofocus: false,
+            autofocus: true,
             obscureText: false,
             decoration: InputDecoration(
               isDense: true,
@@ -97,7 +97,7 @@ Widget AddGoalBottomBar({required Function onPressed, required BuildContext cont
 }
 
 ///The 3 (or 4) main boxes
-Widget GoalTile({required BuildContext context, required Goal goal, required Function onTap, required bool isEdit}) {
+Widget GoalTile({required BuildContext context, required Goal goal, required Function onTap, required bool isEdit, key}) {
   Color borderColor = Color(0xFF010101);
   ColorScheme colorScheme = Theme.of(context).colorScheme;
   Color backgroundColor = Theme.of(context).colorScheme.secondary;
@@ -154,6 +154,7 @@ Widget GoalTile({required BuildContext context, required Goal goal, required Fun
 
   if (isEdit == false) {
     return Opacity(
+      key: key,
       opacity: opacity,
       child: Padding(
         padding: padding,
@@ -191,6 +192,7 @@ Widget GoalTile({required BuildContext context, required Goal goal, required Fun
     );
   } else { //edit mode
     return Padding(
+      key: key,
       padding: padding,
       child: InkWell(
         onTap: () => onTap(),

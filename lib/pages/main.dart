@@ -173,23 +173,44 @@ class _MyHomePageState extends State<MyHomePage> {
         SizedBox(height: deviceSize.height / 30, width: deviceSize.width - 1),
         goalsList.length > 0 ?
         Expanded(
-          child: ListView.builder(
+          child: ReorderableListView.builder(
+            onReorder: (oldIndex, newIndex) {
+              setState(() {
+                // These two lines are workarounds for ReorderableListView problems
+                if (newIndex > goalsList.length) newIndex = goalsList.length;
+                if (oldIndex < newIndex) newIndex--;
+
+                if (oldIndex != newIndex) {
+                  Goal goalBeingReordered = goalsList[oldIndex];
+
+                  goalsList.removeAt(oldIndex);
+                  goalsList.insert(newIndex, goalBeingReordered);
+                  goalsList.asMap().forEach((index, goal) {
+                    goal.priority = index;
+                  });
+                  goalsList.sort((a, b) => a.priority!.compareTo(b.priority!));
+                }
+              });
+            },
             physics: const NeverScrollableScrollPhysics(),
             itemCount: goalsList.length > 4 ? 4 : goalsList.length, //display max 4
             itemBuilder: (context, index) {
               if (index < 5) {
                 return GoalTile(
+                  key: ValueKey(goalsList[index]),
                   isEdit: false,
                   context: context,
                   goal: goalsList[index],
                   onTap: () => showEditDeletePopup(goalsList[index], context),
                 );
+              } else {
+                return SizedBox();
               }
             },
           ),
-        ): Text("enter something"), //todo - better text widget here
+        ): Text("enter something", key: ValueKey("txt")), //todo - better text widget here
         Padding(
-          padding: EdgeInsets.only(bottom: deviceSize.height / 8),
+          padding: EdgeInsets.only(bottom: deviceSize.height / 16),
           child: Container(
             width: deviceSize.width / 2,
             decoration: BoxDecoration(
@@ -227,10 +248,29 @@ class _MyHomePageState extends State<MyHomePage> {
       children: [
         SizedBox(height: deviceSize.height / 30, width: deviceSize.width - 1),
         Expanded(
-          child: ListView.builder(
+          child: ReorderableListView.builder(
+            onReorder: (oldIndex, newIndex) {
+              setState(() {
+                // These two lines are workarounds for ReorderableListView problems
+                if (newIndex > goalsList.length) newIndex = goalsList.length;
+                if (oldIndex < newIndex) newIndex--;
+
+                if (oldIndex != newIndex) {
+                  Goal goalBeingReordered = goalsList[oldIndex];
+
+                  goalsList.removeAt(oldIndex);
+                  goalsList.insert(newIndex, goalBeingReordered);
+                  goalsList.asMap().forEach((index, goal) {
+                    goal.priority = index;
+                  });
+                  goalsList.sort((a, b) => a.priority!.compareTo(b.priority!));
+                }
+              });
+            },
             itemCount: goalsList.length,
             itemBuilder: (context, index) {
                 return GoalTile(
+                  key: ValueKey(goalsList[index]),
                   isEdit: true,
                   context: context,
                   goal: goalsList[index],
